@@ -1385,6 +1385,7 @@ func (l *LightningWallet) selectCoinsAndChange(numCoins btcutil.Amount,
 		return err
 	}
 
+	/*
 	// Peform coin selection over our available, unlocked unspent outputs
 	// in order to find enough coins to meet the funding amount requirements.
 	//
@@ -1402,6 +1403,14 @@ func (l *LightningWallet) selectCoinsAndChange(numCoins btcutil.Amount,
 		l.coinSelectMtx.Unlock()
 		return err
 	}
+  */
+
+	if len(coins) == 0 {
+		return errors.New("no spendable outputs")
+	}
+	// @XXX nadav: just grab the first available output, assume its colored
+	//             (we can't yet verify the colored asset type)
+	selectedCoins := coinset.NewCoinSet([]coinset.Coin{ coins[0] })
 
 	// Lock the selected coins. These coins are now "reserved", this
 	// prevents concurrent funding requests from referring to and this
