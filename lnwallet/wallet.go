@@ -1428,6 +1428,9 @@ func (l *LightningWallet) selectCoinsAndChange(numCoins btcutil.Amount,
 
 	l.coinSelectMtx.Unlock()
 
+	// @XXX nadav: no change for now, we just consume the entire colored output
+	//             (we can't yet tell the amount of colored tokens in the output, so change is moot)
+	/*
 	// Create some possibly neccessary change outputs.
 	selectedTotalValue := coinset.NewCoinSet(selectedCoins.Coins()).TotalValue()
 	if selectedTotalValue > totalWithFee {
@@ -1449,6 +1452,7 @@ func (l *LightningWallet) selectCoinsAndChange(numCoins btcutil.Amount,
 		contribution.ChangeOutputs[0] = wire.NewTxOut(int64(changeAmount),
 			changeAddrScript)
 	}
+	*/
 
 	// TODO(roasbeef): re-calculate fees here to minFeePerKB, may need more inputs
 	return nil
