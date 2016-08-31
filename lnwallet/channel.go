@@ -1453,12 +1453,13 @@ func createCooperativeCloseTx(fundingTxIn *wire.TxIn,
 
 	// The initiator the a cooperative closure pays the fee in entirety.
 	// Determine if we're the initiator so we can compute fees properly.
-	if initiator {
+	// @XXX nadav: no fees for now
+	/*if initiator {
 		// TODO(roasbeef): take sat/byte here instead of properly calc
 		ourBalance -= 5000
 	} else {
 		theirBalance -= 5000
-	}
+	}*/
 
 	// TODO(roasbeef): dust check...
 	//  * although upper layers should prevent
