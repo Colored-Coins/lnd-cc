@@ -5,6 +5,7 @@ import (
 	"container/list"
 	"fmt"
 	"sync"
+	"log"
 
 	"github.com/btcsuite/fastsha256"
 	"github.com/davecgh/go-spew/spew"
@@ -1477,6 +1478,12 @@ func createCooperativeCloseTx(fundingTxIn *wire.TxIn,
 	}
 
 	txsort.InPlaceSort(closeTx)
+
+	closeTx, err := ColorifyTx(closeTx, false)
+	if err != nil {
+		// nadav @TODO return (error, MsgTx) and propagate errors
+		log.Fatal("unable to colorify: %v", err)
+	}
 
 	return closeTx
 }
