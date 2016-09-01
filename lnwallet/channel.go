@@ -519,6 +519,9 @@ func (lc *LightningChannel) fetchCommitmentView(remoteChain bool,
 	// instead we'll just send signatures.
 	txsort.InPlaceSort(commitTx)
 
+	commitTx, err = ColorifyTx(commitTx, false)
+	if err != nil { return nil, err }
+
 	return &commitment{
 		txn:               commitTx,
 		height:            nextHeight,

@@ -848,6 +848,17 @@ func (l *LightningWallet) handleContributionMsg(req *addContributionMsg) {
 	txsort.InPlaceSort(ourCommitTx)
 	txsort.InPlaceSort(theirCommitTx)
 
+	ourCommitTx, err = ColorifyTx(ourCommitTx, false)
+	if err != nil {
+		req.err <- err
+		return
+	}
+	theirCommitTx, err = ColorifyTx(theirCommitTx, false)
+	if err != nil {
+		req.err <- err
+		return
+	}
+
 	deliveryScript, err := txscript.PayToAddrScript(theirContribution.DeliveryAddress)
 	if err != nil {
 		req.err <- err
@@ -1155,8 +1166,19 @@ func (l *LightningWallet) handleSingleFunderSigs(req *addSingleFunderSigsMsg) {
 	// ordering. This ensures that both parties sign the same sighash
 	// without further synchronization.
 	txsort.InPlaceSort(ourCommitTx)
+	ourCommitTx, err = ColorifyTx(ourCommitTx, false)
+	if err != nil {
+		req.err <- err
+		return
+	}
 	pendingReservation.partialState.OurCommitTx = ourCommitTx
+
 	txsort.InPlaceSort(theirCommitTx)
+	theirCommitTx, err = ColorifyTx(theirCommitTx, false)
+	if err != nil {
+		req.err <- err
+		return
+	}
 
 	// Verify that their signature of valid for our current commitment
 	// transaction. Re-generate both the redeemScript and p2sh output. We
