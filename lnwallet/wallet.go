@@ -693,7 +693,15 @@ func (l *LightningWallet) handleContributionMsg(req *addContributionMsg) {
 	// ordering, by sorting we no longer need to send the entire
 	// transaction. Only signatures will be exchanged.
 	fundingTx.AddTxOut(multiSigOut)
-	txsort.InPlaceSort(pendingReservation.fundingTx)
+
+	txsort.InPlaceSort(fundingTx)
+
+	fundingTx, err = ColorifyTx(fundingTx, true)
+	if err != nil {
+		req.err <- err
+		return
+	}
+	pendingReservation.fundingTx = fundingTx
 
 	// Next, sign all inputs that are ours, collecting the signatures in
 	// order of the inputs.
