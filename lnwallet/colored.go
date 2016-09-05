@@ -79,27 +79,23 @@ func ColorifyTx(tx *wire.MsgTx, isFunding bool) (*wire.MsgTx, error) {
 // encodes via a local nodejs server that provides a low-level protocol serialization api
 func EncodeCcInstructions(insts []CcInstruction) ([]byte, error) {
 	_, body, errs := gorequest.New().
-		Post(urlBase + "payment/encode/bulk").
+		Post(urlBase + "encode").
 		Set("Content-Type", "application/json").
 		Send(insts).
 		EndBytes()
 	if errs != nil { return nil, errs[0] }
 
-	return append(coluMagicBytes, body...), nil
+	return body, nil
 }
 
 // unused, not needed for now (both sides independently re-construct the txs)
 // uses "fmt", "encoding/json" and "errors" (currently unimported)
 /*
 func DecodeCcInstructions(opReturn []byte) ([]CcInstruction, error) {
-	if !bytes.Equal(opReturn[:4], coluMagicBytes) {
-		return nil, errors.New("Invalid magic bytes")
-	}
-
 	_, body, errs := gorequest.New().
 		Post(urlBase + "payment/decode/bulk").
 		Set("Content-Type", "application/json").
-		Send("hex", fmt.Sprintf("%02x", opReturn[4:])).
+		Send("hex", fmt.Sprintf("%02x", opReturn)).
 		EndBytes()
 	if errs != nil { return nil, errs[0] }
 
