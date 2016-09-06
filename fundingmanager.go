@@ -3,6 +3,7 @@ package main
 import (
 	"sync"
 	"sync/atomic"
+	"fmt"
 
 	"github.com/lightningnetwork/lnd/lnwallet"
 	"github.com/lightningnetwork/lnd/lnwire"
@@ -434,7 +435,7 @@ func (f *fundingManager) handleFundingResponse(fmsg *fundingResponseMsg) {
 
 	revocationKey := resCtx.reservation.OurContribution().RevocationKey
 	fundingComplete := lnwire.NewSingleFundingComplete(msg.ChannelID,
-		outPoint, commitSig, revocationKey)
+		outPoint, commitSig, revocationKey, resCtx.reservation.NativeCapacity())
 	sourcePeer.queueMsg(fundingComplete, nil)
 }
 
@@ -464,6 +465,8 @@ func (f *fundingManager) handleFundingComplete(fmsg *fundingCompleteMsg) {
 	fndgLog.Infof("completing pendingID(%v) with ChannelPoint(%v)",
 		fmsg.msg.ChannelID, fundingOut,
 	)
+
+	resCtx.reservation.UpdateNativeCapacity(fmsg.msg.NativeCapacity)
 
 	// Append a sighash type of SigHashAll to the signature as it's the
 	// sighash type used implicitly within this type of channel for

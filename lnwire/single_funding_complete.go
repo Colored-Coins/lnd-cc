@@ -7,6 +7,7 @@ import (
 
 	"github.com/roasbeef/btcd/btcec"
 	"github.com/roasbeef/btcd/wire"
+	"github.com/roasbeef/btcutil"
 )
 
 // SingleFundingComplete is the message Alice sends to Bob once she is able to
@@ -35,16 +36,20 @@ type SingleFundingComplete struct {
 	// will send a pre-image which will allow the initiator to sweep the
 	// initiator's funds if the violate the contract.
 	RevocationKey *btcec.PublicKey
+
+	// The amount of native tokens (BTC) in the funding txout
+	NativeCapacity btcutil.Amount
 }
 
 // NewSingleFundingComplete creates, and returns a new empty
 // SingleFundingResponse.
 func NewSingleFundingComplete(chanID uint64, fundingPoint *wire.OutPoint,
-	commitSig *btcec.Signature, revokeKey *btcec.PublicKey) *SingleFundingComplete {
+	commitSig *btcec.Signature, revokeKey *btcec.PublicKey, nativeCapacity btcutil.Amount) *SingleFundingComplete {
 
 	return &SingleFundingComplete{
 		ChannelID:       chanID,
 		FundingOutPoint: fundingPoint,
+		NativeCapacity:  nativeCapacity,
 		CommitSignature: commitSig,
 		RevocationKey:   revokeKey,
 	}
@@ -63,6 +68,7 @@ func (s *SingleFundingComplete) Decode(r io.Reader, pver uint32) error {
 	err := readElements(r,
 		&s.ChannelID,
 		&s.FundingOutPoint,
+		&s.NativeCapacity,
 		&s.CommitSignature,
 		&s.RevocationKey)
 	if err != nil {
@@ -85,6 +91,7 @@ func (s *SingleFundingComplete) Encode(w io.Writer, pver uint32) error {
 	err := writeElements(w,
 		s.ChannelID,
 		s.FundingOutPoint,
+		s.NativeCapacity,
 		s.CommitSignature,
 		s.RevocationKey)
 	if err != nil {
@@ -105,11 +112,11 @@ func (s *SingleFundingComplete) Command() uint32 {
 // MaxPayloadLength returns the maximum allowed payload length for a
 // SingleFundingComplete. This is calculated by summing the max length of all
 // the fields within a SingleFundingResponse. Therefore, the final breakdown
-// is: 8 + 36 + 73 = 150
+// is: 8 + 36 + 73 + 8 = 158
 //
 // This is part of the lnwire.Message interface.
 func (s *SingleFundingComplete) MaxPayloadLength(uint32) uint32 {
-	return 150
+	return 158
 }
 
 // Validate examines each populated field within the SingleFundingComplete for
@@ -144,6 +151,7 @@ func (s *SingleFundingComplete) String() string {
 	return fmt.Sprintf("\n--- Begin SingleFundingComplete ---\n") +
 		fmt.Sprintf("ChannelID:\t\t\t%d\n", s.ChannelID) +
 		fmt.Sprintf("FundingOutPoint:\t\t\t%x\n", s.FundingOutPoint) +
+		fmt.Sprintf("NativeCapacity:\t\t\t%s\n", s.NativeCapacity) +
 		fmt.Sprintf("CommitSignature\t\t\t\t%x\n", s.CommitSignature) +
 		fmt.Sprintf("RevocationKey\t\t\t\t%x\n", rk) +
 		fmt.Sprintf("--- End SingleFundingComplete ---\n")

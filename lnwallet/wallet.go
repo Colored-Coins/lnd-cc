@@ -702,6 +702,8 @@ func (l *LightningWallet) handleContributionMsg(req *addContributionMsg) {
 		return
 	}
 	pendingReservation.fundingTx = fundingTx
+	// @XXX nadav: assumes a single-output tx (no change)
+	pendingReservation.partialState.NativeCapacity = btcutil.Amount(fundingTx.TxOut[0].Value)
 
 	// Next, sign all inputs that are ours, collecting the signatures in
 	// order of the inputs.
@@ -877,7 +879,7 @@ func (l *LightningWallet) handleContributionMsg(req *addContributionMsg) {
 	// Generate a signature for their version of the initial commitment
 	// transaction.
 	hashCache = txscript.NewTxSigHashes(theirCommitTx)
-	channelBalance := pendingReservation.partialState.Capacity
+	channelBalance := pendingReservation.partialState.NativeCapacity
 	sigTheirCommit, err := txscript.RawTxInWitnessSignature(theirCommitTx, hashCache, 0,
 		int64(channelBalance), redeemScript, txscript.SigHashAll, ourKey)
 	if err != nil {
@@ -1048,7 +1050,7 @@ func (l *LightningWallet) handleFundingCounterPartySigs(msg *addCounterPartySigs
 	}
 
 	// First, we sign our copy of the commitment transaction ourselves.
-	channelValue := int64(pendingReservation.partialState.Capacity)
+	channelValue := int64(pendingReservation.partialState.NativeCapacity)
 	hashCache := txscript.NewTxSigHashes(commitTx)
 	ourCommitSig, err := txscript.RawTxInWitnessSignature(commitTx, hashCache, 0,
 		channelValue, redeemScript, txscript.SigHashAll, ourKey)
@@ -1195,7 +1197,7 @@ func (l *LightningWallet) handleSingleFunderSigs(req *addSingleFunderSigsMsg) {
 	// TODO(roasbeef): remove all duplication after merge.
 
 	// First, we sign our copy of the commitment transaction ourselves.
-	channelValue := int64(pendingReservation.partialState.Capacity)
+	channelValue := int64(pendingReservation.partialState.NativeCapacity)
 	hashCache := txscript.NewTxSigHashes(ourCommitTx)
 	theirKey := pendingReservation.theirContribution.MultiSigKey
 	ourKey := pendingReservation.partialState.OurMultiSigKey

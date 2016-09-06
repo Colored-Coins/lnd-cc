@@ -728,7 +728,7 @@ func (lc *LightningChannel) SignNextCommitment() ([]byte, uint32, error) {
 	// Sign their version of the new commitment transaction.
 	hashCache := txscript.NewTxSigHashes(newCommitView.txn)
 	sig, err := txscript.RawTxInWitnessSignature(newCommitView.txn,
-		hashCache, 0, int64(lc.channelState.Capacity),
+		hashCache, 0, int64(lc.channelState.NativeCapacity),
 		lc.channelState.FundingRedeemScript, txscript.SigHashAll,
 		lc.channelState.OurMultiSigKey)
 	if err != nil {
@@ -801,7 +801,7 @@ func (lc *LightningChannel) ReceiveNewCommitment(rawSig []byte,
 	multiSigScript := lc.channelState.FundingRedeemScript
 	hashCache := txscript.NewTxSigHashes(localCommitTx)
 	sigHash, err := txscript.CalcWitnessSigHash(multiSigScript, hashCache,
-		txscript.SigHashAll, localCommitTx, 0, int64(lc.channelState.Capacity))
+		txscript.SigHashAll, localCommitTx, 0, int64(lc.channelState.NativeCapacity))
 	if err != nil {
 		// TODO(roasbeef): fetchview has already mutated the htlc's...
 		//  * need to either roll-back, or make pure
@@ -1304,7 +1304,7 @@ func (lc *LightningChannel) InitCooperativeClose() ([]byte, *wire.ShaHash, error
 	// has been confirmed.
 	hashCache := txscript.NewTxSigHashes(closeTx)
 	closeSig, err := txscript.RawTxInWitnessSignature(closeTx,
-		hashCache, 0, int64(lc.channelState.Capacity),
+		hashCache, 0, int64(lc.channelState.NativeCapacity),
 		lc.channelState.FundingRedeemScript, txscript.SigHashAll,
 		lc.channelState.OurMultiSigKey)
 	if err != nil {
@@ -1343,7 +1343,7 @@ func (lc *LightningChannel) CompleteCooperativeClose(remoteSig []byte) (*wire.Ms
 	// the 2-of-2 multi-sig needed to redeem the funding output.
 	redeemScript := lc.channelState.FundingRedeemScript
 	hashCache := txscript.NewTxSigHashes(closeTx)
-	capacity := int64(lc.channelState.Capacity)
+	capacity := int64(lc.channelState.NativeCapacity)
 	closeSig, err := txscript.RawTxInWitnessSignature(closeTx,
 		hashCache, 0, capacity, redeemScript, txscript.SigHashAll,
 		lc.channelState.OurMultiSigKey)

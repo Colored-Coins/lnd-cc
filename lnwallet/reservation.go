@@ -180,6 +180,18 @@ func (r *ChannelReservation) OurContribution() *ChannelContribution {
 	return r.ourContribution
 }
 
+func (r *ChannelReservation) NativeCapacity() btcutil.Amount {
+	r.RLock()
+	defer r.RUnlock()
+	return r.partialState.NativeCapacity
+}
+
+func (r *ChannelReservation) UpdateNativeCapacity(nativeCapacity btcutil.Amount) () {
+	r.RLock()
+	defer r.RUnlock()
+	r.partialState.NativeCapacity = nativeCapacity
+}
+
 // ProcesContribution verifies the counterparty's contribution to the pending
 // payment channel. As a result of this incoming message, lnwallet is able to
 // build the funding transaction, and both commitment transactions. Once this

@@ -44,13 +44,11 @@ func ColorifyTx(tx *wire.MsgTx, isFunding bool) (*wire.MsgTx, error) {
 			Amount: int(txOut.Value),
 		})
 		if isFunding {
-			// @XXX nadav: commitTx has no way of telling the btc-denominated value of outputs,
-			//      since it was hijacked to represent the colored-asset-denominated value.
-			//      for now, make sure that the fundingTx has a matching amount of both so that
-			//      we're able to properly sign it (segwit signs over input values, too)
-			newTx.AddTxOut(wire.NewTxOut(int64(txOut.Value), txOut.PkScript))
+			// make sure the funding output has enough funding for fees and output dust
+			// @TODO leftover is wasted, better to split everything that's available instead
+			newTx.AddTxOut(wire.NewTxOut(int64(dustAmount*15), txOut.PkScript))
 		} else {
-			// for commit/close txs, always create outputs of dust amount
+			// use dust amounts for outputs of the commit/close txs
 			newTx.AddTxOut(wire.NewTxOut(int64(dustAmount), txOut.PkScript))
 		}
 	}

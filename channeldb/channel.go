@@ -111,6 +111,7 @@ type OpenChannel struct {
 
 	// Tracking total channel capacity, and the amount of funds allocated
 	// to each side.
+	NativeCapacity btcutil.Amount
 	Capacity     btcutil.Amount
 	OurBalance   btcutil.Amount
 	TheirBalance btcutil.Amount
@@ -289,6 +290,7 @@ type ChannelSnapshot struct {
 
 	ChannelPoint *wire.OutPoint
 
+	NativeCapacity btcutil.Amount
 	Capacity      btcutil.Amount
 	LocalBalance  btcutil.Amount
 	RemoteBalance btcutil.Amount
@@ -312,6 +314,7 @@ func (c *OpenChannel) Snapshot() *ChannelSnapshot {
 	snapshot := &ChannelSnapshot{
 		ChannelPoint:          c.ChanID,
 		Capacity:              c.Capacity,
+		NativeCapacity:        c.NativeCapacity,
 		LocalBalance:          c.OurBalance,
 		RemoteBalance:         c.TheirBalance,
 		NumUpdates:            c.NumUpdates,
