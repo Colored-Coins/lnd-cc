@@ -9,7 +9,6 @@ import (
 )
 
 var dustAmount = 546
-var coluMagicBytes = []byte{ 0x43, 0x43, 0x02 } // Colu Protocol { 0x43, 0x43 } + Version { 0x02 }
 var urlBase = os.Getenv("CC_SRVC_URL")
 
 // ColoredCoin transfer instruction
