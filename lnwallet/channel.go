@@ -4,12 +4,14 @@ import (
 	"bytes"
 	"container/list"
 	"fmt"
+	"log"
 	"sync"
 
 	"github.com/btcsuite/fastsha256"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/lightningnetwork/lnd/chainntnfs"
 	"github.com/lightningnetwork/lnd/channeldb"
+	"github.com/lightningnetwork/lnd/lndcc"
 	"github.com/lightningnetwork/lnd/lnwire"
 
 	"github.com/roasbeef/btcd/btcec"
@@ -676,6 +678,11 @@ func (lc *LightningChannel) fetchCommitmentView(remoteChain bool,
 	// ordering. This lets us skip sending the entire transaction over,
 	// instead we'll just send signatures.
 	txsort.InPlaceSort(commitTx)
+
+	commitTx, err = lndcc.ColorifyTx(commitTx, false)
+	if err != nil {
+		return nil, err
+	}
 
 	return &commitment{
 		txn:               commitTx,
@@ -1743,12 +1750,13 @@ func CreateCooperativeCloseTx(fundingTxIn *wire.TxIn,
 
 	// The initiator the a cooperative closure pays the fee in entirety.
 	// Determine if we're the initiator so we can compute fees properly.
-	if initiator {
+	// @CC: disable fees for now
+	/*if initiator {
 		// TODO(roasbeef): take sat/byte here instead of properly calc
 		ourBalance -= 5000
 	} else {
 		theirBalance -= 5000
-	}
+	}*/
 
 	// TODO(roasbeef): dust check...
 	//  * although upper layers should prevent
@@ -1766,6 +1774,12 @@ func CreateCooperativeCloseTx(fundingTxIn *wire.TxIn,
 	}
 
 	txsort.InPlaceSort(closeTx)
+
+	closeTx, err := lndcc.ColorifyTx(closeTx, false)
+	if err != nil {
+		// nadav @TODO return (error, MsgTx) and propagate errors
+		log.Fatal("unable to colorify: %v", err)
+	}
 
 	return closeTx
 }

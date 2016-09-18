@@ -56,3 +56,5 @@ import:
   - context
 - package: google.golang.org/grpc
   version: ^1.0.0
+- package: github.com/parnurzeal/gorequest
+  version: ~0.2.14
